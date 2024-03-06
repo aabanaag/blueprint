@@ -9,23 +9,24 @@ from .models import EmailClassification
 from .models import EmailContent
 
 
-def classify_email_contents_with_pandas(criteria: str = "newsletter"):
+def classify_email_contents_with_pandas(criteria: str = "unsubscribe"):
     """
     Classify email contents using pandas,
     by converting the queryset to a pandas DataFrame.
     """
     dataset = pd.DataFrame(EmailContent.objects.all().values())
 
-    newsletter_dataset = dataset.query(f"body.str.contains('{criteria.lower()}')")
+    newsletter_dataset = dataset[dataset["body"].str.contains(criteria, case=False)]
 
-    for row in newsletter_dataset.iterrows():
-        EmailClassification.objects.create(
-            email_id=row["id"],
-            is_newsletter=True,
-        )
+    if not newsletter_dataset.empty:
+        for _, row in newsletter_dataset.iterrows():
+            EmailClassification.objects.create(
+                email_id=row["id"],
+                is_newsletter=True,
+            )
 
 
-def classify_email_contents_with_orm(criteria: str = "newsletter"):
+def classify_email_contents_with_orm(criteria: str = "unsubscribe"):
     """
     Classify email contents using Django's ORM.
     Use postgres SearchVector to search for the criteria.
