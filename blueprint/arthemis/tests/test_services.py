@@ -9,7 +9,6 @@ from blueprint.arthemis.factories import EmailContentFactory
 from blueprint.arthemis.models import EmailClassification
 from blueprint.arthemis.models import EmailContent
 from blueprint.arthemis.services import classify_email_contents_with_orm
-from blueprint.arthemis.services import classify_email_contents_with_pandas
 
 faker = faker.Faker()
 
@@ -81,22 +80,4 @@ class TestClassifyEmailContents(TestCase):
                 is_newsletter=True,
             ).exists()
             is False
-        )
-
-    def test_should_classify_email_contents_using_pandas(self):
-        """
-        Test the classify_email_contents service using pandas.
-        """
-        EmailContentFactory.create_batch(
-            10,
-            body=f"{faker.paragraph()} Unsubscribe to stop receiving emails.",
-        )
-
-        classify_email_contents_with_pandas()
-
-        assert (
-            EmailClassification.objects.filter(
-                is_newsletter=True,
-            ).exists()
-            is True
         )
