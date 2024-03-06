@@ -35,6 +35,8 @@ services:
       - blueprint_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres
+    ports:
+      - '5432:5432'
 
   docs:
     image: blueprint_local_docs
@@ -91,4 +93,3 @@ services:
     ports:
       - '5555:5555'
     command: /start-flower
-
