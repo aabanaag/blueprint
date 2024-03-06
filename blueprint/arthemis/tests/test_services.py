@@ -3,13 +3,13 @@ Test cases for the services module.
 """
 
 from django.test import TestCase
-
 from factory.faker import faker
 
-from blueprint.arthemis.models import EmailContent, EmailClassification
-from blueprint.arthemis.services import classify_email_contents
-
 from blueprint.arthemis.factories import EmailContentFactory
+from blueprint.arthemis.models import EmailClassification
+from blueprint.arthemis.models import EmailContent
+from blueprint.arthemis.services import classify_email_contents_with_orm
+from blueprint.arthemis.services import classify_email_contents_with_pandas
 
 faker = faker.Faker()
 
@@ -18,11 +18,12 @@ class TestClassifyEmailContents(TestCase):
     """
     Test case for the classify_email_contents service.
     """
+
     def setUp(self):
         super().setUp()
 
         EmailContentFactory.create_batch(
-            20
+            20,
         )
 
     def test_should_classify_email_contents(self):
@@ -31,16 +32,17 @@ class TestClassifyEmailContents(TestCase):
         """
         email = EmailContent.objects.create(
             subject=faker.sentence(),
-            body=f"{faker.paragraph()} Unsubscribe to stop receiving emails."
+            body=f"{faker.paragraph()} Unsubscribe to stop receiving emails.",
         )
 
-        classify_email_contents()
+        classify_email_contents_with_orm()
 
-        self.assertTrue(
+        assert (
             EmailClassification.objects.filter(
                 email=email,
-                is_newsletter=True
+                is_newsletter=True,
             ).exists()
+            is True
         )
 
     def test_should_classify_email_contents_with_criteria(self):
@@ -49,16 +51,17 @@ class TestClassifyEmailContents(TestCase):
         """
         email = EmailContent.objects.create(
             subject=faker.sentence(),
-            body=f"{faker.paragraph()}, this is a newsletter."
+            body=f"{faker.paragraph()}, this is a newsletter.",
         )
 
-        classify_email_contents("newsletter")
+        classify_email_contents_with_orm("newsletter")
 
-        self.assertTrue(
+        assert (
             EmailClassification.objects.filter(
                 email=email,
-                is_newsletter=True
+                is_newsletter=True,
             ).exists()
+            is True
         )
 
     def test_should_not_classify_email_contents(self):
@@ -67,14 +70,33 @@ class TestClassifyEmailContents(TestCase):
         """
         email = EmailContent.objects.create(
             subject=faker.sentence(),
-            body=f"{faker.paragraph()}"
+            body=f"{faker.paragraph()}",
         )
 
-        classify_email_contents()
+        classify_email_contents_with_orm()
 
-        self.assertFalse(
+        assert (
             EmailClassification.objects.filter(
                 email=email,
-                is_newsletter=True
+                is_newsletter=True,
             ).exists()
+            is False
+        )
+
+    def test_should_classify_email_contents_using_pandas(self):
+        """
+        Test the classify_email_contents service using pandas.
+        """
+        EmailContentFactory.create_batch(
+            10,
+            body=f"{faker.paragraph()} Unsubscribe to stop receiving emails.",
+        )
+
+        classify_email_contents_with_pandas()
+
+        assert (
+            EmailClassification.objects.filter(
+                is_newsletter=True,
+            ).exists()
+            is True
         )

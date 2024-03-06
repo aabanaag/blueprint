@@ -82,12 +82,12 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
-    "import_export"
+    "import_export",
 ]
 
 LOCAL_APPS = [
     "blueprint.users.apps.UsersConfig",
-    "blueprint.arthemis.apps.ArthemisConfig"
+    "blueprint.arthemis.apps.ArthemisConfig",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
